@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SafeHaven - Location Safety</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body class="dark">
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div>
+        <div class="logo"><a href="index.html" style="text-decoration: none; color: inherit;">SafeHaven</a></div>
+        <nav>
+          <ul>
+            <li><a href="#" id="location-safety-link">Location Safety</a></li>
+            <li><a href="#" id="crime-reports-link">Crime Reports</a></li>
+            <li><a href="#" id="user-reviews-link">User Reviews</a></li>
+            <li><a href="#" id="safe-zones-link">Safe Zones</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="profile">
+        <img src="user_avatar.png.png" alt="User"/>
+        <span>Hi, Nitin</span>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <input type="text" placeholder="Search SafeHaven..." />
+        <button class="theme-toggle"><i class="fas fa-moon"></i></button>
+      </div>
+
+      <!-- Feature Cards -->
+      <section class="features">
+        <div class="feature-card" id="feature-location">
+          📍<h3>Location Safety</h3>
+        </div>
+        <div class="feature-card" id="feature-crime">
+          🚨<h3>Crime Reports</h3>
+        </div>
+        <div class="feature-card" id="feature-reviews">
+          📝<h3>User Reviews</h3>
+        </div>
+        <div class="feature-card" id="feature-safe-zones">
+          🏪<h3>Verified Safe Zones</h3>
+        </div>
+      </section>
+
+      <!-- Top Rated Locations Section -->
+      <section class="top-rated-locations" id="top-rated-locations-section">
+        <h2>Top Rated Locations</h2>
+        <div id="top-rated-locations" class="top-rated-grid"></div>
+      </section>
+
+      <!-- Location Input Screen -->
+      <section class="location-input-screen" id="location-input-screen" style="margin-top: 2rem;">
+        <h2>Check Location Safety</h2>
+        <input type="text" id="location-name" placeholder="Enter a location name" />
+        <button id="analyze-btn">Analyze</button>
+      </section>
+      
+      <!-- Safety Details -->
+      <section id="safety-details-screen" class="safety-details-screen">
+        <h2>Safety Details for <span id="location-title">[Location]</span></h2>
+        <img id="location-image" src="https://via.placeholder.com/800x300" alt="Location Image"/>
+        <div id="safety-data">Loading data...</div>
+        
+        <!-- Time-Based Features -->
+        <div class="time-based-features">
+          <h3>Safe Hours Analysis</h3>
+          <div class="time-based-analysis">
+            <div class="hourly-chart">
+              <!-- Hour bars will be dynamically inserted via JS -->
+            </div>
+            <div class="night-alert">
+              <i class="fas fa-moon"></i>
+              <span>This location shows increased crime activity during nighttime hours (8 PM - 4 AM). Please take extra precautions.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Location list section-->
+      <section id="location-list-section" style="display: none;">
+        <div id="location-list" class="location-list"></div>
+      </section>
+
+      <!-- Crime Reports Section -->
+      <section id="crime-reports-screen" class="crime-reports-screen">
+        <h2>Crime Reports</h2>
+        <div class="crime-filters">
+          <input type="text" id="crime-search" placeholder="Search crimes..." />
+          <button id="refresh-crime-reports">Refresh</button>
+        </div>
+        <div id="crime-reports-list" class="reports-container">
+          <!-- Crime report cards injected here -->
+        </div>
+      </section>
+
+      <!-- User Reviews Section -->
+      <section id="user-reviews-screen" class="user-reviews-screen">
+        <h2>Submit Your Review</h2>
+        <input type="text" id="review-location" placeholder="Location Name" />
+        <textarea id="review-text" placeholder="Write your review here..." rows="4"></textarea>
+        <select id="review-rating">
+          <option value="">Rate this location</option>
+          <option value="1">1 Star</option>
+          <option value="2">2 Stars</option>
+          <option value="3">3 Stars</option>
+          <option value="4">4 Stars</option>
+          <option value="5">5 Stars</option>
+        </select>
+        <button id="submit-review-btn">Submit Review</button>
+
+        <h3 style="margin-top: 2rem;">Previous Reviews</h3>
+        <!-- Filter by Rating -->
+        <div class="review-filter">
+          <label for="rating-filter">Filter by Rating:</label>
+          <select id="rating-filter">
+            <option value="">All Ratings</option>
+            <option value="1">1 ★</option>
+            <option value="2">2 ★</option>
+            <option value="3">3 ★</option>
+            <option value="4">4 ★</option>
+            <option value="5">5 ★</option>
+          </select>
+        </div>
+        <div id="review-list" class="review-list"></div>
+      </section>
+
+      <!-- Safe Zones Section -->
+      <section id="safe-zones-screen" class="safe-zones-screen">        <h2>Safe Zones</h2>
+        <div class="safe-zone-filters">
+          <select id="safe-zone-category">
+            <option value="">All Categories</option>
+            <option value="Café">Café</option>
+            <option value="Hostel">Hostel</option>
+            <option value="Police Station">Police Station</option>
+            <option value="Public Restroom">Public Restroom</option>
+            <option value="Others">Others</option>
+          </select>
+          <button id="refresh-safe-zones">Refresh</button>
+        </div>
+        <div id="safe-zones-list" class="zones-container">
+          <!-- Safe zone cards injected here -->
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="notifications"></div>
+  <script src="script.js"></script>
+</body>
+</html>

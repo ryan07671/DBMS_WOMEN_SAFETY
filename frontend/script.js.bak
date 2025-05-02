@@ -1,0 +1,488 @@
+document.addEventListener('DOMContentLoaded', () => {
+  const BASE_URL = 'http://localhost:5000';
+
+  function hideAllScreens() {
+    document.querySelectorAll("section").forEach(section => {
+      section.style.display = "none";
+    });
+    document.querySelector('.features').style.display = 'grid';
+  }
+
+  const locationLink = document.getElementById('location-safety-link');
+  const crimeReportsLink = document.getElementById('crime-reports-link');
+  const reviewsLink = document.getElementById('user-reviews-link');
+  const safeZonesLink = document.getElementById('safe-zones-link');
+
+  const locationInputScreen = document.getElementById('location-input-screen');
+  const safetyDetailsScreen = document.getElementById('safety-details-screen');
+  const userReviewsScreen = document.getElementById('user-reviews-screen');
+  const crimeReportsScreen = document.getElementById('crime-reports-screen');
+  const safeZonesScreen = document.getElementById('safe-zones-screen');
+  const featureSection = document.querySelector('.features');
+
+  const locationNameInput = document.getElementById('location-name');
+  const analyzeBtn = document.getElementById('analyze-btn');
+  const safetyDataDiv = document.getElementById('safety-data');
+  const locationTitleSpan = document.getElementById('location-title');
+  const locationImage = document.getElementById('location-image');
+
+  const reviewLocationInput = document.getElementById('review-location');
+  const reviewTextInput = document.getElementById('review-text');
+  const reviewRatingInput = document.getElementById('review-rating');
+  const submitReviewBtn = document.getElementById('submit-review-btn');
+  const reviewList = document.getElementById('review-list');
+
+  const crimeReportsList = document.getElementById('crime-reports-list');
+  const refreshCrimeReportsBtn = document.getElementById('refresh-crime-reports');
+
+  const safeZonesList = document.getElementById('safe-zones-list');
+  const refreshSafeZonesBtn = document.getElementById('refresh-safe-zones');
+
+  hideAllScreens();
+
+  locationLink.addEventListener('click', () => {
+    hideAllScreens();
+    locationInputScreen.style.display = 'block';
+    featureSection.style.display = 'none';
+  });
+
+  crimeReportsLink.addEventListener('click', () => {
+    hideAllScreens();
+    crimeReportsScreen.style.display = 'block';
+    featureSection.style.display = 'none';
+    loadCrimeReports();
+  });
+
+  reviewsLink.addEventListener('click', () => {
+    hideAllScreens();
+    userReviewsScreen.style.display = 'block';
+    featureSection.style.display = 'none';
+    loadReviews();
+  });
+
+  safeZonesLink.addEventListener('click', () => {
+    hideAllScreens();
+    safeZonesScreen.style.display = 'block';
+    featureSection.style.display = 'none';
+    loadSafeZones();
+  });
+
+  document.getElementById('feature-location').addEventListener('click', () => {
+    hideAllScreens();
+    locationInputScreen.style.display = 'block';
+    featureSection.style.display = 'none';
+  });
+
+  document.getElementById('feature-crime').addEventListener('click', () => {
+    hideAllScreens();
+    crimeReportsScreen.style.display = 'block';
+    featureSection.style.display = 'none';
+    loadCrimeReports();
+  });
+
+  document.getElementById('feature-reviews').addEventListener('click', () => {
+    hideAllScreens();
+    userReviewsScreen.style.display = 'block';
+    featureSection.style.display = 'none';
+    loadReviews();
+  });
+
+  document.getElementById('feature-safe-zones').addEventListener('click', () => {
+    hideAllScreens();
+    safeZonesScreen.style.display = 'block';
+    featureSection.style.display = 'none';
+    loadSafeZones();
+  });
+
+  analyzeBtn.addEventListener('click', async () => {
+    const locationName = locationNameInput.value.trim();
+    if (!locationName) {
+      alert('Please enter a location.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${BASE_URL}/api/safety/check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ location: locationName }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        safetyDataDiv.innerHTML = `<p>${data.error}</p>`;
+        return;
+      }
+
+      locationTitleSpan.textContent = data.name || locationName;
+      locationImage.src = data.image_url || 'assets/sample_location.jpg';
+
+      safetyDataDiv.innerHTML = `
+        <p><strong>Crime Rate:</strong> ${data.crime_rate ?? 'N/A'}</p>
+        <p><strong>Safety Rating:</strong> ${data.safety_rating ?? 'N/A'}/5</p>
+        <p><strong>Nighttime Safety:</strong> ${data.night_insights ?? 'N/A'}</p>
+      `;
+
+      locationInputScreen.style.display = 'none';
+      safetyDetailsScreen.style.display = 'block';
+    } catch (err) {
+      console.error('Fetch error:', err);
+      alert('Unable to connect to server. Please check your backend.');
+    }
+  });
+
+  submitReviewBtn.addEventListener('click', async () => {
+    const locationName = reviewLocationInput.value.trim();
+    const reviewText = reviewTextInput.value.trim();
+    const rating = parseInt(reviewRatingInput.value);
+    const userId = 1;
+
+    if (!locationName || !rating || rating < 1 || rating > 5) {
+      alert('Please provide a valid location and rating (1-5 stars)');
+      return;
+    }
+
+    try {
+      const locationRes = await fetch(`${BASE_URL}/api/safety/get-location-id?name=${encodeURIComponent(locationName)}`);
+      const locationData = await locationRes.json();
+
+      if (!locationData.LocationID) {
+        throw new Error('Failed to get location ID');
+      }
+
+      const reviewRes = await fetch(`${BASE_URL}/api/safety/submit-review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          locationId: locationData.LocationID,
+          rating,
+          reviewText
+        })
+      });
+
+      const result = await reviewRes.json();
+
+      if (reviewRes.ok) {
+        alert('Review submitted successfully!');
+        reviewLocationInput.value = '';
+        reviewTextInput.value = '';
+        reviewRatingInput.value = '';
+        await loadReviews();
+      } else {
+        throw new Error(result.error || 'Failed to submit review');
+      }
+    } catch (err) {
+      console.error('Error submitting review:', err);
+      alert(err.message || 'Failed to submit review');
+    }
+  });
+
+  async function loadCrimeReports() {
+    try {
+      const response = await fetch(`${BASE_URL}/api/safety/crime-reports`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const crimeReports = await response.json();
+
+      crimeReportsList.innerHTML = '';
+
+      if (crimeReports.length === 0) {
+        crimeReportsList.innerHTML = '<p>No crime reports found in the database.</p>';
+        return;
+      }
+
+      crimeReports.forEach(report => {
+        const reportCard = document.createElement('div');
+        reportCard.className = 'report-card';
+        reportCard.innerHTML = `
+          <h3>${report.CrimeType}</h3>
+          <p><strong>Location:</strong> ${report.LocationName || 'Unknown'}</p>
+          <p><strong>Date:</strong> ${new Date(report.DateTime).toLocaleString()}</p>
+          <p>${report.Description || 'No description provided'}</p>
+          <small>Source: ${report.Source || 'Unknown'}</small>
+        `;
+        crimeReportsList.appendChild(reportCard);
+      });
+    } catch (err) {
+      console.error('Error loading crime reports:', err);
+      crimeReportsList.innerHTML = `
+        <p class="error-message">
+          Error loading crime reports: ${err.message}<br>
+          Please check your network connection and try again.
+        </p>
+      `;
+    }
+  }
+
+  async function loadSafeZones() {
+    try {
+      const category = document.getElementById('safe-zone-category')?.value;
+      const url = category 
+        ? `${BASE_URL}/api/safety/safe-zones?category=${category}` 
+        : `${BASE_URL}/api/safety/safe-zones`;
+
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const safeZones = await response.json();
+
+      safeZonesList.innerHTML = '';
+
+      if (safeZones.length === 0) {
+        safeZonesList.innerHTML = '<p>No verified safe zones found in the database.</p>';
+        return;
+      }
+
+      safeZones.forEach(zone => {
+        const zoneCard = document.createElement('div');
+        zoneCard.className = 'zone-card';
+        zoneCard.innerHTML = `
+          <h3>${zone.ListingName} <span class="category-badge">${zone.Category}</span></h3>
+          <p><strong>Location:</strong> ${zone.LocationName}</p>
+          ${zone.ContactInfo ? `<p><strong>Contact:</strong> ${zone.ContactInfo}</p>` : ''}
+          <div class="verification-badge">✅ Verified</div>
+        `;
+        safeZonesList.appendChild(zoneCard);
+      });
+    } catch (err) {
+      console.error('Error loading safe zones:', err);
+      safeZonesList.innerHTML = `
+        <p class="error-message">
+          Error loading safe zones: ${err.message}<br>
+          Please check your network connection and try again.
+        </p>
+      `;
+    }
+  }
+
+  async function loadReviews() {
+    try {
+      const response = await fetch(`${BASE_URL}/api/safety/reviews`);
+      const reviews = await response.json();
+
+      reviewList.innerHTML = '';
+
+      if (reviews.length === 0) {
+        reviewList.innerHTML = '<li>No reviews yet. Be the first to review!</li>';
+        return;
+      }
+
+      reviews.forEach(review => {
+        const reviewItem = document.createElement('li');
+        reviewItem.className = 'review-item';
+        reviewItem.innerHTML = `
+          <div class="review-header">
+            <strong>${review.LocationName}</strong>
+            <span class="rating">${'★'.repeat(review.Rating)}${'☆'.repeat(5 - review.Rating)}</span>
+          </div>
+          <div class="review-body">${review.ReviewText || 'No description provided'}</div>
+          <div class="review-footer">
+            <small>Reviewed by ${review.UserName || 'User #'+review.UserID}</small>
+            <small>${new Date(review.ReviewDate).toLocaleString()}</small>
+          </div>
+        `;
+        reviewList.appendChild(reviewItem);
+      });
+    } catch (err) {
+      console.error('Error loading reviews:', err);
+      reviewList.innerHTML = '<li>Error loading reviews. Please try again later.</li>';
+    }
+  }
+});
+
+// API Configuration
+const API_BASE_URL = 'http://localhost:5000/api';
+
+// DOM Elements
+const locationInputScreen = document.getElementById('location-input-screen');
+const safetyDetailsScreen = document.getElementById('safety-details-screen');
+const userReviewsScreen = document.getElementById('user-reviews-screen');
+const crimeReportsScreen = document.getElementById('crime-reports-screen');
+const safeZonesScreen = document.getElementById('safe-zones-screen');
+
+// Navigation
+document.getElementById('location-safety-link').addEventListener('click', () => {
+  showScreen('location-input-screen');
+});
+
+document.getElementById('crime-reports-link').addEventListener('click', () => {
+  showScreen('crime-reports-screen');
+  loadCrimeReports();
+});
+
+document.getElementById('user-reviews-link').addEventListener('click', () => {
+  showScreen('user-reviews-screen');
+});
+
+document.getElementById('safe-zones-link').addEventListener('click', () => {
+  showScreen('safe-zones-screen');
+  loadSafeZones();
+});
+
+// Location Safety Analysis
+document.getElementById('analyze-btn').addEventListener('click', async () => {
+  const locationName = document.getElementById('location-name').value;
+  if (!locationName) return;
+
+  try {
+    // Search for location
+    const response = await fetch(`${API_BASE_URL}/locations?search=${locationName}`);
+    const locations = await response.json();
+    
+    if (locations.length === 0) {
+      alert('Location not found');
+      return;
+    }
+
+    const location = locations[0];
+    document.getElementById('location-title').textContent = location.name;
+    
+    // Get safety analysis
+    const safetyResponse = await fetch(`${API_BASE_URL}/locations/${location.LocationID}/safety`);
+    const safetyData = await safetyResponse.json();
+    
+    displaySafetyAnalysis(safetyData);
+    showScreen('safety-details-screen');
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to analyze location');
+  }
+});
+
+// Display Safety Analysis
+function displaySafetyAnalysis(data) {
+  const safetyDataDiv = document.getElementById('safety-data');
+  safetyDataDiv.innerHTML = `
+    <div class="safety-score">
+      <h3>Safety Score: ${data.safetyScore.toFixed(1)}/10</h3>
+      <div class="score-bar">
+        <div class="score-fill" style="width: ${data.safetyScore * 10}%"></div>
+      </div>
+    </div>
+    <div class="crime-reports">
+      <h3>Recent Crime Reports (${data.crimeReports.length})</h3>
+      ${data.crimeReports.map(report => `
+        <div class="crime-report">
+          <p><strong>${report.CrimeType}</strong> - ${report.Description}</p>
+          <small>${new Date(report.DateTime).toLocaleString()}</small>
+        </div>
+      `).join('')}
+    </div>
+    <div class="reviews">
+      <h3>User Reviews (${data.reviews.length})</h3>
+      ${data.reviews.map(review => `
+        <div class="review">
+          <div class="rating">${'★'.repeat(review.Rating)}${'☆'.repeat(5 - review.Rating)}</div>
+          <p>${review.ReviewText}</p>
+          <small>${new Date(review.ReviewDate).toLocaleString()}</small>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// Crime Reports
+async function loadCrimeReports() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/crime-reports`);
+    const reports = await response.json();
+    
+    const reportsList = document.getElementById('crime-reports-list');
+    reportsList.innerHTML = reports.map(report => `
+      <div class="crime-report-card">
+        <h3>${report.CrimeType}</h3>
+        <p>${report.Description}</p>
+        <small>${new Date(report.DateTime).toLocaleString()}</small>
+        <span class="source">Source: ${report.Source}</span>
+      </div>
+    `).join('');
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to load crime reports');
+  }
+}
+
+// Safe Zones
+async function loadSafeZones() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/safe-zones`);
+    const zones = await response.json();
+    
+    const zonesList = document.getElementById('safe-zones-list');
+    zonesList.innerHTML = zones.map(zone => `
+      <div class="safe-zone-card">
+        <h3>${zone.Name}</h3>
+        <p class="category">${zone.Category}</p>
+        <p class="address">${zone.address}</p>
+        <p class="contact">${zone.ContactInfo}</p>
+        <div class="verification-status ${zone.VerificationStatus ? 'verified' : 'unverified'}">
+          ${zone.VerificationStatus ? '✓ Verified' : 'Unverified'}
+        </div>
+      </div>
+    `).join('');
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to load safe zones');
+  }
+}
+
+// User Reviews
+document.getElementById('submit-review-btn').addEventListener('click', async () => {
+  const location = document.getElementById('review-location').value;
+  const reviewText = document.getElementById('review-text').value;
+  const rating = document.getElementById('review-rating').value;
+  
+  if (!location || !reviewText || !rating) {
+    alert('Please fill in all fields');
+    return;
+  }
+
+  try {
+    // First, find or create the location
+    const locationResponse = await fetch(`${API_BASE_URL}/locations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: location })
+    });
+    const locationData = await locationResponse.json();
+
+    // Then submit the review
+    const reviewResponse = await fetch(`${API_BASE_URL}/reviews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        locationId: locationData.id,
+        rating: parseInt(rating),
+        reviewText
+      })
+    });
+
+    if (reviewResponse.ok) {
+      alert('Review submitted successfully');
+      document.getElementById('review-location').value = '';
+      document.getElementById('review-text').value = '';
+      document.getElementById('review-rating').value = '';
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to submit review');
+  }
+});
+
+// Helper Functions
+function showScreen(screenId) {
+  const screens = [
+    'location-input-screen',
+    'safety-details-screen',
+    'user-reviews-screen',
+    'crime-reports-screen',
+    'safe-zones-screen'
+  ];
+
+  screens.forEach(id => {
+    document.getElementById(id).style.display = id === screenId ? 'block' : 'none';
+  });
+}
+
+// Initialize
+showScreen('location-input-screen');
