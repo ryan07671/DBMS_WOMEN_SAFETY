@@ -1,1 +1,80 @@
-i will again make the project
+Project Requirements for SafeHaven
+To develop SafeHaven as a functional and user-friendly platform, the following requirements
+need to be considered:
+1. Functional Requirements
+a. Location Safety Analysis
+• Fetch crime data for a location (real-time API or database).
+• Show safety ratings based on crime rates and user reports.
+• Provide nighttime safety insights.
+c. User Reviews & Community Insights
+• Allow users to submit safety reviews & ratings for locations.
+• Implement moderation to prevent spam or fake reviews.
+d. Safe Zones & Business Listings
+• Highlight women-friendly locations (cafés, hostels, police stations, etc.).
+• Enable businesses to register & verify their listings.
+e. Search & Filters
+• Search locations by name, category, or safety score.
+• Filter by crime type, time of day, or user ratings.
+g. User Authentication & Profiles
+• Secure sign-up/login (email, Google, social login).
+• Allow users to save favorite locations and past searches.
+2. Non-Functional Requirements
+a. Performance & Scalability
+• Handle large datasets efficiently (crime reports, user reviews).
+• Ensure fast response times for search and safety analysis.
+b. Security & Privacy
+• Encrypt user data and location history.
+• Implement secure API authentication.
+c. Cross-Platform Compatibility
+• Responsive design for web and mobile.
+• Consider a mobile app for real-time safety updates.
+d User-Friendly UI/UX
+• Clean, intuitive interface for easy navigation.
+• Dark mode for nighttime usage.
+Stakeholders of SafeHaven
+SafeHaven involves multiple stakeholders who contribute to and benefit from the platform.
+These include:
+1. Primary Stakeholders (Directly Impacted)
+a. Women & General Users – The main users who rely on SafeHaven for location safety
+insights, reviews, and alerts.
+b. Business Owners – Cafés, hostels, and other women-friendly establishments listed on the
+platform to attract customers.
+c. Law Enforcement Agencies – Police and security officials who can use the data for safety
+monitoring and crime prevention.
+2. Secondary Stakeholders (Indirectly Impacted)
+1. Government & NGOs – Organizations working on women's safety can use SafeHaven’s
+insights for policy-making and intervention.
+2. Data Providers & Researchers – Institutions using crime data and user reports for safety
+analytics and studies.
+Tech Stack
+1. Frontend: React.js (for a dynamic and interactive UI)
+2. Backend: Node.js with Express.js (for API handling and server-side logic)
+3. Database: SQL (PostgreSQL/MySQL) for structured data storage
+SafeHaven: Empowering Women with Safer Choices
+What is SafeHaven?
+SafeHaven is a community-driven platform designed to help women assess the safety of
+locations based on crime rates, user reviews, and nighttime safety insights. It highlights safe
+zones such as women-friendly cafés, hostels, and police stations to support informed and
+confident decision-making.
+Why is SafeHaven Useful?
+• Informed Decision-Making – Helps users choose safer routes and locations by
+providing safety ratings based on verified crime data and community input.
+• Community-Powered Safety – User-generated reviews and insights foster a trusted
+network of real experiences and local knowledge.
+• Location-Based Insights – Offers visibility into how safe a place is, especially during
+nighttime hours.
+Why is it a Great Idea for Women’s and Public Safety?
+• Crime Prevention – Increases awareness of potentially unsafe areas through
+transparent data sharing.
+• Confidence & Independence – Enables women to move more freely by providing
+access to safety-related information.
+• Support Network – Encourages women to share safety tips and insights, helping
+others avoid risky areas.
+Why Should We Use SafeHaven?
+• Trustworthy & Data-Driven – Combines official crime reports with user reviews to
+ensure credibility and relevance.
+• User-Friendly – Clean and intuitive interface for checking safety scores, reading
+community reviews, and finding safe spaces.
+• Community Impact – Promotes collective responsibility for public safety by
+encouraging users to contribute and stay informed.
+SafeHaven isn’t just an app—it’s a movement towards a safer, more informed world. 
